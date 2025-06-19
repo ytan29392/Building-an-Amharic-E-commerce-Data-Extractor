@@ -1,0 +1,5 @@
+scripts/folder.py
+venv/
+__pycache__/
+data/
+*.csv
