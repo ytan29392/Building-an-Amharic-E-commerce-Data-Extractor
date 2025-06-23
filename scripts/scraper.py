@@ -1,18 +1,30 @@
-from telethon.sync import TelegramClient
-import pandas as pd
-import asyncio
-import re
 import os
+import re
+import asyncio
+import pandas as pd
+from dotenv import load_dotenv
+from telethon.sync import TelegramClient
+
+# Load credentials from .env
+
+load_dotenv()
+
+api_id = int(os.getenv("API_ID"))
+api_hash = os.getenv("API_HASH")
 
 # Clean Amharic text
+
 def clean_amharic_text(text):
     if not text:
         return ''
+    # Keep Amharic characters, some punctuation, English letters, and numbers
     text = re.sub(r'[^\u1200-\u137F\s0-9a-zA-Z፡።፣]', '', text)
     text = re.sub(r'\s+', ' ', text).strip()
     return text
 
+
 # Fetch messages from one channel
+
 async def fetch_channel_messages(api_id, api_hash, channel_username, limit=100):
     async with TelegramClient('session', api_id, api_hash) as client:
         messages = []
@@ -27,7 +39,9 @@ async def fetch_channel_messages(api_id, api_hash, channel_username, limit=100):
             })
         return pd.DataFrame(messages)
 
+
 # Run scraper for multiple channels
+
 def run_scraper(api_id, api_hash, channel_list, limit=100, save_path="../data/structured_telegram_data.csv"):
     all_data = []
     status_report = []
@@ -38,7 +52,7 @@ def run_scraper(api_id, api_hash, channel_list, limit=100, save_path="../data/st
             df = asyncio.run(fetch_channel_messages(api_id, api_hash, channel, limit))
             df['clean_text'] = df['message'].apply(clean_amharic_text)
             all_data.append(df)
-            print(f"✅ {channel}: {len(df)} messages fetched.")
+            print(f"{channel}: {len(df)} messages fetched.")
             status_report.append((channel, "Success", len(df)))
         except Exception as e:
             print(f"{channel}: Failed. Error: {str(e)}")
