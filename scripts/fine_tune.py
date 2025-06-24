@@ -1,5 +1,3 @@
-
-
 def parse_conll(file_path):
     sentences = []
     tokens, labels = [], []
